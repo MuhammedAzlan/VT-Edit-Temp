@@ -1,0 +1,2573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Azlan Shorts Studio</title>
+
+    <!-- Real browser video-rendering engine -->
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+    <script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+
+    <style>
+        :root {
+            --cream: #f7f3e9;
+            --cream-dark: #eee7d7;
+            --white: #ffffff;
+            --grey: #667085;
+            --grey-light: #e5e7eb;
+            --grey-dark: #344054;
+            --blue: #5271ff;
+            --blue-light: #eef2ff;
+            --green: #16a36a;
+            --red: #d64545;
+            --shadow: 0 8px 25px rgba(52, 64, 84, 0.10);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            color: var(--grey-dark);
+            background: var(--cream);
+            font-family: Inter, Arial, sans-serif;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .header {
+            min-height: 68px;
+            padding: 12px 22px;
+            background: var(--white);
+            border-bottom: 1px solid var(--grey-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-logo {
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            color: white;
+            font-size: 22px;
+            background: linear-gradient(135deg, #5271ff, #8c6ff7);
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 19px;
+        }
+
+        .brand small {
+            color: var(--grey);
+        }
+
+        .header-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .btn {
+            border: 0;
+            border-radius: 9px;
+            padding: 10px 15px;
+            font-weight: 700;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            color: white;
+            background: var(--blue);
+        }
+
+        .btn-success {
+            color: white;
+            background: var(--green);
+        }
+
+        .btn-light {
+            color: var(--grey-dark);
+            background: var(--blue-light);
+            border: 1px solid #d8defd;
+        }
+
+        .btn-danger {
+            color: white;
+            background: var(--red);
+        }
+
+        .btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            transform: none;
+        }
+
+        .app {
+            min-height: calc(100vh - 68px);
+            display: grid;
+            grid-template-columns: 300px minmax(420px, 1fr) 310px;
+        }
+
+        .panel {
+            padding: 18px;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.76);
+        }
+
+        .left-panel {
+            border-right: 1px solid var(--grey-light);
+        }
+
+        .right-panel {
+            border-left: 1px solid var(--grey-light);
+        }
+
+        .section {
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid var(--grey-light);
+            border-radius: 14px;
+            background: var(--white);
+            box-shadow: 0 3px 12px rgba(52, 64, 84, 0.05);
+        }
+
+        .section h3 {
+            font-size: 14px;
+            margin: 0 0 12px;
+        }
+
+        .section-note {
+            display: block;
+            margin-top: 8px;
+            color: var(--grey);
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .upload-box {
+            padding: 18px 10px;
+            border: 2px dashed #bdc8fb;
+            border-radius: 12px;
+            background: #fafbff;
+            text-align: center;
+            transition: 0.2s;
+        }
+
+        .upload-box:hover {
+            border-color: var(--blue);
+            background: var(--blue-light);
+        }
+
+        .upload-box input {
+            display: none;
+        }
+
+        .upload-box label {
+            display: block;
+            cursor: pointer;
+        }
+
+        .upload-icon {
+            display: block;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .file-name,
+        .clip-count {
+            color: var(--blue);
+            font-size: 12px;
+            margin-top: 8px;
+            overflow-wrap: anywhere;
+        }
+
+        label.field-label {
+            display: block;
+            color: var(--grey);
+            font-size: 12px;
+            font-weight: 700;
+            margin: 10px 0 6px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="url"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            color: var(--grey-dark);
+            background: #fbfbfc;
+            border: 1px solid #d9dde5;
+            border-radius: 9px;
+            outline: none;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(82, 113, 255, 0.12);
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+
+        .two-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 9px;
+        }
+
+        .full-btn {
+            width: 100%;
+            margin-top: 9px;
+        }
+
+        .center {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            background:
+                radial-gradient(circle at top, #ffffff 0, #f7f3e9 62%);
+        }
+
+        .preview-area {
+            min-height: 590px;
+            padding: 22px;
+            display: grid;
+            place-items: center;
+        }
+
+        .preview-phone {
+            width: 315px;
+            aspect-ratio: 9 / 16;
+            position: relative;
+            overflow: hidden;
+            border-radius: 22px;
+            background: #171717;
+            border: 7px solid #ffffff;
+            box-shadow: var(--shadow);
+        }
+
+        .preview-phone video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+            background: #efe9dd;
+        }
+
+        .empty-state {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-content: center;
+            text-align: center;
+            color: #a39d90;
+            background: #f0ece3;
+        }
+
+        .empty-state span {
+            font-size: 48px;
+        }
+
+        .text-overlay {
+            position: absolute;
+            left: 7%;
+            right: 7%;
+            z-index: 3;
+            padding: 8px 10px;
+            color: white;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.65);
+            pointer-events: none;
+            display: none;
+        }
+
+        .logo-overlay {
+            position: absolute;
+            z-index: 4;
+            object-fit: contain;
+            display: none;
+            pointer-events: none;
+        }
+
+        .preview-controls {
+            margin-top: 13px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .preview-info {
+            margin-top: 9px;
+            text-align: center;
+            color: var(--grey);
+            font-size: 12px;
+        }
+
+        .timeline-wrap {
+            padding: 15px 18px 20px;
+            background: rgba(255, 255, 255, 0.88);
+            border-top: 1px solid var(--grey-light);
+        }
+
+        .timeline-title {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .timeline {
+            min-height: 125px;
+            padding: 12px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            border-radius: 13px;
+            border: 1px solid var(--grey-light);
+            background: var(--cream);
+        }
+
+        .timeline-empty {
+            width: 100%;
+            display: grid;
+            place-content: center;
+            color: var(--grey);
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .clip-card {
+            width: 125px;
+            min-width: 125px;
+            padding: 7px;
+            border: 2px solid transparent;
+            border-radius: 11px;
+            background: var(--white);
+            box-shadow: 0 3px 10px rgba(52, 64, 84, 0.08);
+            cursor: pointer;
+        }
+
+        .clip-card.selected {
+            border-color: var(--blue);
+            background: var(--blue-light);
+        }
+
+        .clip-thumb {
+            width: 100%;
+            height: 68px;
+            border-radius: 8px;
+            overflow: hidden;
+            display: grid;
+            place-content: center;
+            color: white;
+            font-size: 30px;
+            background: #9da6b5;
+            position: relative;
+        }
+
+        .clip-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .clip-number {
+            position: absolute;
+            left: 5px;
+            top: 5px;
+            min-width: 21px;
+            height: 21px;
+            padding: 0 5px;
+            border-radius: 12px;
+            display: grid;
+            place-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            background: rgba(0, 0, 0, 0.68);
+        }
+
+        .clip-title {
+            margin: 6px 0 3px;
+            font-size: 11px;
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .clip-duration {
+            font-size: 10px;
+            color: var(--grey);
+        }
+
+        .clip-buttons {
+            margin-top: 6px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+        }
+
+        .clip-buttons button {
+            padding: 4px;
+            border: 0;
+            border-radius: 5px;
+            background: #edf0f4;
+        }
+
+        .progress-box {
+            padding: 12px;
+            margin-top: 12px;
+            border-radius: 10px;
+            background: var(--blue-light);
+            display: none;
+        }
+
+        .progress-box.show {
+            display: block;
+        }
+
+        .progress-track {
+            height: 9px;
+            overflow: hidden;
+            margin-top: 8px;
+            border-radius: 10px;
+            background: #d7dcf7;
+        }
+
+        .progress-fill {
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--blue), #8a65ee);
+            transition: width 0.2s;
+        }
+
+        .status {
+            margin-top: 8px;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .success {
+            color: var(--green);
+        }
+
+        .error {
+            color: var(--red);
+        }
+
+        .warning {
+            color: #a66500;
+        }
+
+        .checkbox-row {
+            margin: 9px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .ai-output {
+            min-height: 170px;
+            font-size: 12px;
+        }
+
+        .result-card {
+            border-color: #b7dfcf;
+            background: #f3fcf7;
+        }
+
+        @media (max-width: 1100px) {
+            .app {
+                grid-template-columns: 270px 1fr;
+            }
+
+            .right-panel {
+                grid-column: 1 / -1;
+                border-left: 0;
+                border-top: 1px solid var(--grey-light);
+                display: grid;
+                grid-template-columns: repeat(2, minmax(250px, 1fr));
+                gap: 15px;
+            }
+
+            .right-panel .section {
+                margin: 0;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .header {
+                position: static;
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .app {
+                display: block;
+            }
+
+            .panel {
+                border: 0;
+            }
+
+            .preview-area {
+                min-height: auto;
+            }
+
+            .preview-phone {
+                width: min(315px, 88vw);
+            }
+
+            .right-panel {
+                display: block;
+            }
+
+            .right-panel .section {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header class="header">
+    <div class="brand">
+        <div class="brand-logo">🎬</div>
+        <div>
+            <h1>Azlan Shorts Studio</h1>
+            <small>Real browser video combiner</small>
+        </div>
+    </div>
+
+    <div class="header-actions">
+        <button class="btn btn-light" onclick="playAllClips()">▶ Preview all</button>
+        <button class="btn btn-light" id="previewResultButton"
+                onclick="previewRenderedVideo()" disabled>
+            🎞 Preview result
+        </button>
+        <button class="btn btn-primary" id="renderButton"
+                onclick="renderProject()">
+            ⚙ Render video
+        </button>
+        <button class="btn btn-success" id="downloadButton"
+                onclick="downloadResult()" disabled>
+            ⬇ Download MP4
+        </button>
+    </div>
+</header>
+
+<main class="app">
+
+    <!-- LEFT PANEL -->
+    <aside class="panel left-panel">
+
+        <section class="section">
+            <h3>1. Upload video clips</h3>
+
+            <div class="upload-box">
+                <input id="videoInput" type="file" accept="video/*" multiple>
+                <label for="videoInput">
+                    <span class="upload-icon">🎥</span>
+                    <strong>Select up to 25 videos</strong>
+                    <small class="section-note">MP4, MOV, WebM and other supported formats</small>
+                </label>
+            </div>
+
+            <div class="clip-count" id="clipCount">0 / 25 clips</div>
+        </section>
+
+        <section class="section">
+            <h3>2. Background music</h3>
+
+            <div class="upload-box">
+                <input id="musicInput" type="file" accept="audio/*">
+                <label for="musicInput">
+                    <span class="upload-icon">🎵</span>
+                    <strong>Select music</strong>
+                </label>
+            </div>
+
+            <div class="file-name" id="musicName">No music selected</div>
+
+            <label class="field-label">
+                Music volume: <span id="musicVolumeLabel">35%</span>
+            </label>
+            <input id="musicVolume" type="range" min="0" max="100" value="35">
+        </section>
+
+        <section class="section">
+            <h3>3. Logo / watermark</h3>
+
+            <div class="upload-box">
+                <input id="logoInput" type="file" accept="image/*">
+                <label for="logoInput">
+                    <span class="upload-icon">🏷️</span>
+                    <strong>Select PNG/JPG logo</strong>
+                </label>
+            </div>
+
+            <div class="file-name" id="logoName">No logo selected</div>
+        </section>
+
+        <section class="section">
+            <h3>🤖 AI scene prompt builder</h3>
+
+            <label class="field-label">Main video idea or scene lines</label>
+            <textarea id="masterPrompt" rows="5"
+                      placeholder="Example: A motivational journey of a young entrepreneur.
+
+Or paste one scene on each line."></textarea>
+
+            <label class="field-label">Number of scenes</label>
+            <input id="sceneCount" type="number" min="1" max="20" value="20">
+
+            <button class="btn btn-primary full-btn" onclick="buildScenePrompts()">
+                Create numbered prompts
+            </button>
+
+            <label class="field-label">Generated prompts</label>
+            <textarea id="promptOutput" class="ai-output"
+                      placeholder="Prompts 1–20 will appear here"></textarea>
+
+            <button class="btn btn-light full-btn" onclick="copyPrompts()">
+                Copy all prompts
+            </button>
+
+            <label class="field-label">Secure AI backend endpoint</label>
+            <input id="aiEndpoint" type="url"
+                   placeholder="Example: /api/generate-video">
+
+            <button class="btn btn-light full-btn" onclick="generateAIClips()">
+                Generate clips through backend
+            </button>
+
+            <small class="section-note">
+                A static HTML file cannot safely connect directly to Meta AI or
+                store an API key. This connector sends each prompt to your secure
+                backend one by one. Your backend must return a video file or a
+                JSON object containing <strong>videoUrl</strong>.
+            </small>
+        </section>
+
+    </aside>
+
+    <!-- CENTER -->
+    <section class="center">
+
+        <div class="preview-area">
+            <div>
+                <div class="preview-phone" id="previewPhone">
+                    <video id="previewVideo" playsinline controls></video>
+
+                    <div class="empty-state" id="emptyState">
+                        <div>
+                            <span>📱</span>
+                            <p>Upload clips to start</p>
+                            <small>Vertical 9:16 project</small>
+                        </div>
+                    </div>
+
+                    <div class="text-overlay" id="textOverlay"></div>
+                    <img class="logo-overlay" id="logoOverlay" alt="Logo">
+                </div>
+
+                <div class="preview-controls">
+                    <button class="btn btn-light" onclick="previousClip()">⏮ Previous</button>
+                    <button class="btn btn-primary" onclick="playAllClips()">▶ Play all</button>
+                    <button class="btn btn-light" onclick="pausePreview()">⏸ Pause</button>
+                    <button class="btn btn-light" onclick="nextClip()">Next ⏭</button>
+                </div>
+
+                <div class="preview-info" id="previewInfo">
+                    No clip selected
+                </div>
+            </div>
+        </div>
+
+        <div class="timeline-wrap">
+            <div class="timeline-title">
+                <span>🎞 Video timeline — drag clips to reorder</span>
+                <span id="totalDuration">Total: 0.0 seconds</span>
+            </div>
+
+            <div class="timeline" id="timeline">
+                <div class="timeline-empty">
+                    <div>
+                        <div style="font-size:32px">🎬</div>
+                        Your video thumbnails will appear here
+                    </div>
+                </div>
+            </div>
+
+            <div class="progress-box" id="progressBox">
+                <strong id="progressText">Preparing renderer...</strong>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="status" id="renderStatus"></div>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- RIGHT PANEL -->
+    <aside class="panel right-panel">
+
+        <section class="section">
+            <h3>✂ Selected clip</h3>
+
+            <div id="selectedClipName" class="file-name">
+                Select a timeline clip
+            </div>
+
+            <div class="two-fields">
+                <div>
+                    <label class="field-label">Start second</label>
+                    <input id="clipStart" type="number" min="0" step="0.1" value="0">
+                </div>
+
+                <div>
+                    <label class="field-label">End second</label>
+                    <input id="clipEnd" type="number" min="0.1" step="0.1" value="0">
+                </div>
+            </div>
+
+            <button class="btn btn-light full-btn" onclick="moveSelected(-1)">
+                ← Move left
+            </button>
+
+            <button class="btn btn-light full-btn" onclick="moveSelected(1)">
+                Move right →
+            </button>
+
+            <button class="btn btn-danger full-btn" onclick="deleteSelectedClip()">
+                Delete selected clip
+            </button>
+        </section>
+
+        <section class="section">
+            <h3>⚡ Automatic editing</h3>
+
+            <label class="field-label">Maximum seconds per clip</label>
+            <input id="autoSeconds" type="number" min="0.5" max="60"
+                   step="0.5" value="3">
+
+            <button class="btn btn-primary full-btn" onclick="autoTrimClips()">
+                Auto trim all clips
+            </button>
+
+            <label class="checkbox-row">
+                <input id="fadeTransitions" type="checkbox" checked>
+                <span>Add a short fade at the beginning and end of each clip</span>
+            </label>
+        </section>
+
+        <section class="section">
+            <h3>📝 Text overlay</h3>
+
+            <label class="field-label">Text</label>
+            <textarea id="overlayText" rows="3"
+                      placeholder="Subscribe • Like • Follow"></textarea>
+
+            <div class="two-fields">
+                <div>
+                    <label class="field-label">Position</label>
+                    <select id="textPosition">
+                        <option value="top">Top</option>
+                        <option value="center" selected>Center</option>
+                        <option value="bottom">Bottom</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="field-label">Text color</label>
+                    <input id="textColor" type="color" value="#ffffff"
+                           style="height:40px">
+                </div>
+            </div>
+
+            <label class="field-label">
+                Font size: <span id="fontSizeLabel">58px</span>
+            </label>
+            <input id="fontSize" type="range" min="24" max="120" value="58">
+
+            <label class="field-label">
+                Transparent background:
+                <span id="textOpacityLabel">45%</span>
+            </label>
+            <input id="textOpacity" type="range" min="0" max="90" value="45">
+        </section>
+
+        <section class="section">
+            <h3>🏷️ Logo settings</h3>
+
+            <label class="field-label">Logo position</label>
+            <select id="logoPosition">
+                <option value="top-left">Top left</option>
+                <option value="top-right" selected>Top right</option>
+                <option value="bottom-left">Bottom left</option>
+                <option value="bottom-right">Bottom right</option>
+            </select>
+
+            <label class="field-label">
+                Logo size: <span id="logoSizeLabel">16%</span>
+            </label>
+            <input id="logoSize" type="range" min="5" max="40" value="16">
+        </section>
+
+        <section class="section">
+            <h3>🎥 Export settings</h3>
+
+            <label class="field-label">Resolution</label>
+            <select id="resolution">
+                <option value="720x1280" selected>
+                    720 × 1280 — recommended
+                </option>
+                <option value="1080x1920">
+                    1080 × 1920 — more memory
+                </option>
+            </select>
+
+            <label class="field-label">Video fitting</label>
+            <select id="fitMode">
+                <option value="fit">
+                    Fit with cream background
+                </option>
+                <option value="crop">
+                    Fill screen and crop edges
+                </option>
+            </select>
+
+            <label class="field-label">Quality</label>
+            <select id="quality">
+                <option value="28">Draft — faster</option>
+                <option value="24" selected>Good quality</option>
+                <option value="20">High quality — slower</option>
+            </select>
+
+            <small class="section-note">
+                Export uses background music only. Original sound from uploaded
+                clips is removed for reliable browser combining.
+            </small>
+        </section>
+
+        <section class="section">
+            <h3>🛡️ Copyright rights checklist</h3>
+
+            <label class="checkbox-row">
+                <input id="ownVideoRights" type="checkbox">
+                <span>I created these clips or have permission to use them.</span>
+            </label>
+
+            <label class="checkbox-row">
+                <input id="ownMusicRights" type="checkbox">
+                <span>I own this music or have a valid licence.</span>
+            </label>
+
+            <label class="field-label">Music source/licence</label>
+            <input id="musicLicense" type="text"
+                   placeholder="YouTube Audio Library or licence URL">
+
+            <button class="btn btn-light full-btn" onclick="checkRights()">
+                Check rights information
+            </button>
+
+            <div id="rightsResult" class="status"></div>
+
+            <a href="https://www.youtube.com/audiolibrary"
+               target="_blank" rel="noopener"
+               style="font-size:12px;color:#5271ff">
+                Open YouTube Audio Library
+            </a>
+
+            <small class="section-note">
+                This checklist cannot scan YouTube Content ID or guarantee that
+                a claim will not occur. YouTube performs its own copyright check
+                during upload.
+            </small>
+        </section>
+
+        <section class="section result-card">
+            <h3>✅ Final result</h3>
+            <div id="resultInfo" class="status">
+                Render the project to create your combined MP4.
+            </div>
+        </section>
+
+    </aside>
+
+</main>
+
+<audio id="musicPreview" loop></audio>
+
+<script>
+    const $ = (id) => document.getElementById(id);
+
+    let clips = [];
+    let selectedClipId = null;
+    let currentClipIndex = -1;
+    let sequencePlaying = false;
+
+    let music = null;
+    let logo = null;
+
+    let renderedBlob = null;
+    let renderedURL = null;
+    let renderedMode = false;
+
+    let scenePrompts = [];
+
+    let ffmpeg = null;
+    let ffmpegLoaded = false;
+    let rendering = false;
+    let lastFFmpegLog = "";
+
+    let progressBase = 0;
+    let progressSpan = 0;
+
+    const previewVideo = $("previewVideo");
+    const musicPreview = $("musicPreview");
+
+    function uid() {
+        if (window.crypto && crypto.randomUUID) {
+            return crypto.randomUUID();
+        }
+
+        return "clip-" + Date.now() + "-" + Math.random();
+    }
+
+    function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+    }
+
+    function formatTime(seconds) {
+        const value = Number(seconds) || 0;
+        return value.toFixed(1) + "s";
+    }
+
+    function getSelectedClip() {
+        return clips.find((clip) => clip.id === selectedClipId) || null;
+    }
+
+    function totalProjectDuration() {
+        return clips.reduce((total, clip) => {
+            return total + Math.max(0.1, clip.end - clip.start);
+        }, 0);
+    }
+
+    function updateTotalDuration() {
+        $("totalDuration").textContent =
+            "Total: " + totalProjectDuration().toFixed(1) + " seconds";
+    }
+
+    async function inspectVideo(file, url) {
+        return new Promise((resolve) => {
+            const video = document.createElement("video");
+            video.preload = "metadata";
+            video.muted = true;
+            video.playsInline = true;
+            video.src = url;
+
+            let duration = 3;
+            let finished = false;
+
+            function finish(thumb = "") {
+                if (finished) return;
+                finished = true;
+                resolve({ duration, thumb });
+            }
+
+            video.onerror = () => finish("");
+
+            video.onloadedmetadata = () => {
+                if (Number.isFinite(video.duration) && video.duration > 0) {
+                    duration = video.duration;
+                }
+
+                const capture = () => {
+                    try {
+                        const canvas = document.createElement("canvas");
+                        canvas.width = 240;
+                        canvas.height = 135;
+
+                        const ctx = canvas.getContext("2d");
+                        ctx.fillStyle = "#222";
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                        if (video.videoWidth && video.videoHeight) {
+                            ctx.drawImage(
+                                video,
+                                0,
+                                0,
+                                canvas.width,
+                                canvas.height
+                            );
+                        }
+
+                        finish(canvas.toDataURL("image/jpeg", 0.72));
+                    } catch (error) {
+                        finish("");
+                    }
+                };
+
+                video.onseeked = capture;
+
+                try {
+                    video.currentTime = Math.min(
+                        0.2,
+                        Math.max(0, duration / 2)
+                    );
+
+                    if (duration <= 0.2) {
+                        setTimeout(capture, 100);
+                    }
+                } catch (error) {
+                    capture();
+                }
+            };
+
+            setTimeout(() => finish(""), 8000);
+        });
+    }
+
+    async function addVideoFiles(fileList) {
+        const incoming = Array.from(fileList || []);
+
+        if (!incoming.length) return;
+
+        const available = 25 - clips.length;
+
+        if (available <= 0) {
+            alert("Maximum 25 clips are allowed.");
+            return;
+        }
+
+        const selectedFiles = incoming.slice(0, available);
+
+        $("clipCount").textContent = "Reading video information...";
+
+        for (const file of selectedFiles) {
+            const url = URL.createObjectURL(file);
+            const data = await inspectVideo(file, url);
+
+            clips.push({
+                id: uid(),
+                file,
+                url,
+                name: file.name,
+                duration: data.duration,
+                start: 0,
+                end: data.duration,
+                thumb: data.thumb
+            });
+        }
+
+        if (!selectedClipId && clips.length) {
+            selectedClipId = clips[0].id;
+            currentClipIndex = 0;
+            loadClip(0, false, false);
+        }
+
+        renderTimeline();
+        updateSelectedClipControls();
+    }
+
+    $("videoInput").addEventListener("change", async (event) => {
+        await addVideoFiles(event.target.files);
+        event.target.value = "";
+    });
+
+    $("musicInput").addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (music && music.url) {
+            URL.revokeObjectURL(music.url);
+        }
+
+        const url = URL.createObjectURL(file);
+
+        music = { file, url, name: file.name };
+        musicPreview.src = url;
+
+        $("musicName").textContent = "🎵 " + file.name;
+        event.target.value = "";
+    });
+
+    $("logoInput").addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (logo && logo.url) {
+            URL.revokeObjectURL(logo.url);
+        }
+
+        const url = URL.createObjectURL(file);
+
+        logo = { file, url, name: file.name };
+
+        $("logoName").textContent = "🏷️ " + file.name;
+        $("logoOverlay").src = url;
+
+        renderedMode = false;
+        updateOverlayPreview();
+
+        event.target.value = "";
+    });
+
+    function renderTimeline() {
+        const timeline = $("timeline");
+        timeline.innerHTML = "";
+
+        if (!clips.length) {
+            timeline.innerHTML = `
+                <div class="timeline-empty">
+                    <div>
+                        <div style="font-size:32px">🎬</div>
+                        Your video thumbnails will appear here
+                    </div>
+                </div>
+            `;
+
+            $("clipCount").textContent = "0 / 25 clips";
+            updateTotalDuration();
+            return;
+        }
+
+        clips.forEach((clip, index) => {
+            const card = document.createElement("div");
+            card.className = "clip-card";
+
+            if (clip.id === selectedClipId) {
+                card.classList.add("selected");
+            }
+
+            card.draggable = true;
+
+            const thumb = document.createElement("div");
+            thumb.className = "clip-thumb";
+
+            if (clip.thumb) {
+                const image = document.createElement("img");
+                image.src = clip.thumb;
+                image.alt = "Video thumbnail";
+                thumb.appendChild(image);
+            } else {
+                thumb.textContent = "🎬";
+            }
+
+            const number = document.createElement("span");
+            number.className = "clip-number";
+            number.textContent = index + 1;
+            thumb.appendChild(number);
+
+            const title = document.createElement("div");
+            title.className = "clip-title";
+            title.textContent = clip.name;
+            title.title = clip.name;
+
+            const duration = document.createElement("div");
+            duration.className = "clip-duration";
+            duration.textContent =
+                "🎥 " + formatTime(clip.end - clip.start);
+
+            const buttons = document.createElement("div");
+            buttons.className = "clip-buttons";
+
+            const left = document.createElement("button");
+            left.textContent = "←";
+            left.title = "Move left";
+            left.onclick = (event) => {
+                event.stopPropagation();
+                moveClip(index, -1);
+            };
+
+            const play = document.createElement("button");
+            play.textContent = "▶";
+            play.title = "Preview clip";
+            play.onclick = (event) => {
+                event.stopPropagation();
+                selectClip(index);
+                previewVideo.play();
+            };
+
+            const remove = document.createElement("button");
+            remove.textContent = "✕";
+            remove.title = "Remove";
+            remove.onclick = (event) => {
+                event.stopPropagation();
+                removeClip(index);
+            };
+
+            buttons.append(left, play, remove);
+            card.append(thumb, title, duration, buttons);
+
+            card.addEventListener("click", () => selectClip(index));
+
+            card.addEventListener("dragstart", (event) => {
+                event.dataTransfer.setData("text/plain", String(index));
+                event.dataTransfer.effectAllowed = "move";
+            });
+
+            card.addEventListener("dragover", (event) => {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = "move";
+            });
+
+            card.addEventListener("drop", (event) => {
+                event.preventDefault();
+
+                const from = Number(
+                    event.dataTransfer.getData("text/plain")
+                );
+
+                if (!Number.isInteger(from) || from === index) return;
+
+                const movedClip = clips.splice(from, 1)[0];
+                clips.splice(index, 0, movedClip);
+
+                selectedClipId = movedClip.id;
+                currentClipIndex = clips.findIndex(
+                    (item) => item.id === movedClip.id
+                );
+
+                renderTimeline();
+                updateSelectedClipControls();
+            });
+
+            timeline.appendChild(card);
+        });
+
+        $("clipCount").textContent = clips.length + " / 25 clips";
+        updateTotalDuration();
+    }
+
+    function selectClip(index) {
+        if (!clips[index]) return;
+
+        selectedClipId = clips[index].id;
+        currentClipIndex = index;
+        sequencePlaying = false;
+
+        pauseMusic();
+        loadClip(index, false, false);
+        renderTimeline();
+        updateSelectedClipControls();
+    }
+
+    function loadClip(index, autoplay = false, keepSequence = false) {
+        const clip = clips[index];
+        if (!clip) return;
+
+        renderedMode = false;
+        currentClipIndex = index;
+        selectedClipId = clip.id;
+        sequencePlaying = keepSequence;
+
+        previewVideo.src = clip.url;
+        previewVideo.currentTime = clip.start || 0;
+        previewVideo.style.objectFit =
+            $("fitMode").value === "crop" ? "cover" : "contain";
+
+        $("emptyState").style.display = "none";
+        $("previewInfo").textContent =
+            `Clip ${index + 1} of ${clips.length}: ${clip.name}`;
+
+        updateOverlayPreview();
+
+        if (autoplay) {
+            previewVideo.oncanplay = () => {
+                previewVideo.oncanplay = null;
+                previewVideo.play().catch(() => {});
+            };
+        }
+    }
+
+    previewVideo.addEventListener("timeupdate", () => {
+        if (renderedMode) return;
+
+        const clip = clips[currentClipIndex];
+        if (!clip) return;
+
+        if (previewVideo.currentTime >= clip.end) {
+            if (sequencePlaying) {
+                playNextSequenceClip();
+            } else {
+                previewVideo.pause();
+            }
+        }
+    });
+
+    previewVideo.addEventListener("ended", () => {
+        if (sequencePlaying && !renderedMode) {
+            playNextSequenceClip();
+        }
+    });
+
+    function playNextSequenceClip() {
+        if (currentClipIndex + 1 < clips.length) {
+            loadClip(currentClipIndex + 1, true, true);
+            renderTimeline();
+            updateSelectedClipControls();
+        } else {
+            sequencePlaying = false;
+            pauseMusic();
+        }
+    }
+
+    function playAllClips() {
+        if (!clips.length) {
+            alert("Upload video clips first.");
+            return;
+        }
+
+        sequencePlaying = true;
+        loadClip(0, true, true);
+        renderTimeline();
+        updateSelectedClipControls();
+
+        if (music) {
+            musicPreview.currentTime = 0;
+            musicPreview.volume =
+                Number($("musicVolume").value) / 100;
+
+            musicPreview.play().catch(() => {});
+        }
+    }
+
+    function pausePreview() {
+        sequencePlaying = false;
+        previewVideo.pause();
+        pauseMusic();
+    }
+
+    function pauseMusic() {
+        musicPreview.pause();
+    }
+
+    function previousClip() {
+        if (!clips.length) return;
+        const index = Math.max(0, currentClipIndex - 1);
+        selectClip(index);
+    }
+
+    function nextClip() {
+        if (!clips.length) return;
+        const index = Math.min(clips.length - 1, currentClipIndex + 1);
+        selectClip(index);
+    }
+
+    function moveClip(index, direction) {
+        const newIndex = index + direction;
+
+        if (newIndex < 0 || newIndex >= clips.length) return;
+
+        const selected = clips[index];
+        [clips[index], clips[newIndex]] = [clips[newIndex], clips[index]];
+
+        selectedClipId = selected.id;
+        currentClipIndex = newIndex;
+
+        renderTimeline();
+        loadClip(newIndex, false, false);
+        updateSelectedClipControls();
+    }
+
+    function moveSelected(direction) {
+        const index = clips.findIndex(
+            (clip) => clip.id === selectedClipId
+        );
+
+        if (index >= 0) {
+            moveClip(index, direction);
+        }
+    }
+
+    function removeClip(index) {
+        const clip = clips[index];
+        if (!clip) return;
+
+        URL.revokeObjectURL(clip.url);
+        clips.splice(index, 1);
+
+        if (clips.length) {
+            const nextIndex = Math.min(index, clips.length - 1);
+            selectedClipId = clips[nextIndex].id;
+            currentClipIndex = nextIndex;
+            loadClip(nextIndex, false, false);
+        } else {
+            selectedClipId = null;
+            currentClipIndex = -1;
+
+            previewVideo.pause();
+            previewVideo.removeAttribute("src");
+            previewVideo.load();
+
+            $("emptyState").style.display = "grid";
+            $("previewInfo").textContent = "No clip selected";
+        }
+
+        renderTimeline();
+        updateSelectedClipControls();
+    }
+
+    function deleteSelectedClip() {
+        const index = clips.findIndex(
+            (clip) => clip.id === selectedClipId
+        );
+
+        if (index >= 0) {
+            removeClip(index);
+        }
+    }
+
+    function updateSelectedClipControls() {
+        const clip = getSelectedClip();
+
+        if (!clip) {
+            $("selectedClipName").textContent =
+                "Select a timeline clip";
+            $("clipStart").value = 0;
+            $("clipEnd").value = 0;
+            return;
+        }
+
+        $("selectedClipName").textContent = "🎬 " + clip.name;
+        $("clipStart").value = clip.start.toFixed(1);
+        $("clipEnd").value = clip.end.toFixed(1);
+        $("clipStart").max = Math.max(0, clip.duration - 0.1);
+        $("clipEnd").max = clip.duration;
+    }
+
+    function updateClipTrim() {
+        const clip = getSelectedClip();
+        if (!clip) return;
+
+        let start = Number($("clipStart").value);
+        let end = Number($("clipEnd").value);
+
+        start = clamp(
+            Number.isFinite(start) ? start : 0,
+            0,
+            Math.max(0, clip.duration - 0.1)
+        );
+
+        end = clamp(
+            Number.isFinite(end) ? end : clip.duration,
+            start + 0.1,
+            clip.duration
+        );
+
+        clip.start = start;
+        clip.end = end;
+
+        $("clipStart").value = start.toFixed(1);
+        $("clipEnd").value = end.toFixed(1);
+
+        renderTimeline();
+    }
+
+    $("clipStart").addEventListener("change", updateClipTrim);
+    $("clipEnd").addEventListener("change", updateClipTrim);
+
+    function autoTrimClips() {
+        if (!clips.length) {
+            alert("Upload clips first.");
+            return;
+        }
+
+        const seconds = clamp(
+            Number($("autoSeconds").value) || 3,
+            0.5,
+            60
+        );
+
+        clips.forEach((clip) => {
+            clip.start = 0;
+            clip.end = Math.min(clip.duration, seconds);
+        });
+
+        renderTimeline();
+        updateSelectedClipControls();
+    }
+
+    function updateOverlayPreview() {
+        const textElement = $("textOverlay");
+        const logoElement = $("logoOverlay");
+        const text = $("overlayText").value.trim();
+
+        if (renderedMode) {
+            textElement.style.display = "none";
+            logoElement.style.display = "none";
+            return;
+        }
+
+        if (text) {
+            const opacity =
+                Number($("textOpacity").value) / 100;
+
+            textElement.textContent = text;
+            textElement.style.display = "block";
+            textElement.style.color = $("textColor").value;
+            textElement.style.background =
+                `rgba(0,0,0,${opacity})`;
+
+            const previewFontSize =
+                Math.max(12, Number($("fontSize").value) * 0.36);
+
+            textElement.style.fontSize =
+                previewFontSize + "px";
+
+            const position = $("textPosition").value;
+
+            textElement.style.top = "auto";
+            textElement.style.bottom = "auto";
+            textElement.style.transform = "none";
+
+            if (position === "top") {
+                textElement.style.top = "8%";
+            } else if (position === "bottom") {
+                textElement.style.bottom = "10%";
+            } else {
+                textElement.style.top = "50%";
+                textElement.style.transform = "translateY(-50%)";
+            }
+        } else {
+            textElement.style.display = "none";
+        }
+
+        if (logo) {
+            const size = Number($("logoSize").value);
+            const position = $("logoPosition").value;
+
+            logoElement.style.display = "block";
+            logoElement.style.width = size + "%";
+            logoElement.style.height = "auto";
+            logoElement.style.top = "auto";
+            logoElement.style.bottom = "auto";
+            logoElement.style.left = "auto";
+            logoElement.style.right = "auto";
+
+            if (position.includes("top")) {
+                logoElement.style.top = "3%";
+            } else {
+                logoElement.style.bottom = "3%";
+            }
+
+            if (position.includes("left")) {
+                logoElement.style.left = "3%";
+            } else {
+                logoElement.style.right = "3%";
+            }
+        } else {
+            logoElement.style.display = "none";
+        }
+    }
+
+    [
+        "overlayText",
+        "textPosition",
+        "textColor",
+        "fontSize",
+        "textOpacity",
+        "logoPosition",
+        "logoSize",
+        "fitMode"
+    ].forEach((id) => {
+        $(id).addEventListener("input", () => {
+            $("fontSizeLabel").textContent =
+                $("fontSize").value + "px";
+
+            $("textOpacityLabel").textContent =
+                $("textOpacity").value + "%";
+
+            $("logoSizeLabel").textContent =
+                $("logoSize").value + "%";
+
+            previewVideo.style.objectFit =
+                $("fitMode").value === "crop"
+                    ? "cover"
+                    : "contain";
+
+            renderedMode = false;
+            updateOverlayPreview();
+        });
+    });
+
+    $("musicVolume").addEventListener("input", () => {
+        const value = Number($("musicVolume").value);
+
+        $("musicVolumeLabel").textContent = value + "%";
+        musicPreview.volume = value / 100;
+    });
+
+    function buildScenePrompts() {
+        const main = $("masterPrompt").value.trim();
+
+        if (!main) {
+            alert("Enter your main video idea first.");
+            return;
+        }
+
+        const count = clamp(
+            Number($("sceneCount").value) || 20,
+            1,
+            20
+        );
+
+        const inputLines = main
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean);
+
+        const cameraStyles = [
+            "wide establishing shot",
+            "cinematic close-up",
+            "smooth tracking shot",
+            "low-angle dramatic shot",
+            "overhead camera shot",
+            "slow-motion action shot",
+            "handheld documentary shot",
+            "macro detail shot",
+            "symmetrical composition",
+            "dynamic push-in camera movement"
+        ];
+
+        const lightingStyles = [
+            "soft morning light",
+            "warm golden-hour lighting",
+            "bright clean studio lighting",
+            "dramatic cinematic lighting",
+            "natural daylight",
+            "soft cream and white colour palette"
+        ];
+
+        scenePrompts = [];
+
+        for (let i = 0; i < count; i++) {
+            const source =
+                inputLines.length > 1
+                    ? inputLines[i % inputLines.length]
+                    : main;
+
+            const camera =
+                cameraStyles[i % cameraStyles.length];
+
+            const light =
+                lightingStyles[i % lightingStyles.length];
+
+            const prompt =
+                `${source}. Scene ${i + 1}. ` +
+                `${camera}, ${light}, realistic detail, ` +
+                `smooth movement, vertical 9:16 composition, ` +
+                `YouTube Shorts style, no text, no watermark.`;
+
+            scenePrompts.push(prompt);
+        }
+
+        $("promptOutput").value = scenePrompts
+            .map((prompt, index) => `${index + 1}. ${prompt}`)
+            .join("\n\n");
+    }
+
+    async function copyPrompts() {
+        const text = $("promptOutput").value;
+
+        if (!text) {
+            alert("Generate prompts first.");
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(text);
+            alert("All prompts copied.");
+        } catch (error) {
+            $("promptOutput").select();
+            document.execCommand("copy");
+            alert("All prompts copied.");
+        }
+    }
+
+    async function generateAIClips() {
+        const endpoint = $("aiEndpoint").value.trim();
+
+        if (!endpoint) {
+            alert(
+                "Enter your secure AI backend endpoint. " +
+                "Do not put a private API key directly inside this HTML file."
+            );
+            return;
+        }
+
+        if (!scenePrompts.length) {
+            buildScenePrompts();
+        }
+
+        if (!scenePrompts.length) return;
+
+        const available = 25 - clips.length;
+
+        if (available <= 0) {
+            alert("The timeline already contains 25 clips.");
+            return;
+        }
+
+        const promptsToSend = scenePrompts.slice(0, available);
+
+        $("progressBox").classList.add("show");
+        $("progressFill").style.width = "0%";
+
+        try {
+            for (let i = 0; i < promptsToSend.length; i++) {
+                $("progressText").textContent =
+                    `Generating AI clip ${i + 1} of ${promptsToSend.length}`;
+
+                $("renderStatus").textContent =
+                    "Sending prompt to your secure backend...";
+
+                const response = await fetch(endpoint, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        prompt: promptsToSend[i],
+                        sceneNumber: i + 1,
+                        aspectRatio: "9:16"
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(
+                        `AI backend returned ${response.status}`
+                    );
+                }
+
+                const contentType =
+                    response.headers.get("content-type") || "";
+
+                let videoBlob;
+
+                if (contentType.startsWith("video/")) {
+                    videoBlob = await response.blob();
+                } else {
+                    const data = await response.json();
+
+                    if (!data.videoUrl) {
+                        throw new Error(
+                            "Backend response does not contain videoUrl."
+                        );
+                    }
+
+                    const videoResponse = await fetch(data.videoUrl);
+
+                    if (!videoResponse.ok) {
+                        throw new Error("Could not download AI video.");
+                    }
+
+                    videoBlob = await videoResponse.blob();
+                }
+
+                const file = new File(
+                    [videoBlob],
+                    `ai-scene-${String(i + 1).padStart(2, "0")}.mp4`,
+                    { type: videoBlob.type || "video/mp4" }
+                );
+
+                await addVideoFiles([file]);
+
+                const percentage =
+                    ((i + 1) / promptsToSend.length) * 100;
+
+                $("progressFill").style.width = percentage + "%";
+            }
+
+            $("renderStatus").innerHTML =
+                '<span class="success">AI clips added to the timeline.</span>';
+        } catch (error) {
+            $("renderStatus").innerHTML =
+                `<span class="error">${error.message}</span>`;
+        }
+    }
+
+    function checkRights() {
+        const videoRights = $("ownVideoRights").checked;
+        const musicRights = $("ownMusicRights").checked;
+        const licence = $("musicLicense").value.trim();
+        const result = $("rightsResult");
+
+        if (!videoRights) {
+            result.innerHTML =
+                '<span class="error">Video rights are not confirmed.</span>';
+            return;
+        }
+
+        if (music && !musicRights) {
+            result.innerHTML =
+                '<span class="error">Music rights are not confirmed.</span>';
+            return;
+        }
+
+        if (music && !licence) {
+            result.innerHTML =
+                '<span class="warning">Rights are selected, but you should add the music source or licence.</span>';
+            return;
+        }
+
+        result.innerHTML =
+            '<span class="success">Rights checklist completed.</span> ' +
+            'This is not a Content ID scan or copyright guarantee.';
+    }
+
+    function setProgress(percent, text, status = "") {
+        $("progressBox").classList.add("show");
+        $("progressFill").style.width =
+            clamp(percent, 0, 100) + "%";
+
+        if (text) {
+            $("progressText").textContent = text;
+        }
+
+        if (status) {
+            $("renderStatus").textContent = status;
+        }
+    }
+
+    async function ensureFFmpeg() {
+        if (ffmpegLoaded) return;
+
+        if (!window.FFmpegWASM || !window.FFmpegUtil) {
+            throw new Error(
+                "FFmpeg library could not load. Check your internet connection."
+            );
+        }
+
+        setProgress(
+            1,
+            "Loading video engine...",
+            "The first load can take some time."
+        );
+
+        ffmpeg = new FFmpegWASM.FFmpeg();
+
+        ffmpeg.on("log", ({ message }) => {
+            lastFFmpegLog = message;
+        });
+
+        ffmpeg.on("progress", ({ progress }) => {
+            if (!Number.isFinite(progress)) return;
+
+            const total =
+                (progressBase + progress * progressSpan) * 100;
+
+            $("progressFill").style.width =
+                clamp(total, 0, 99) + "%";
+        });
+
+        const baseURL =
+            "https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd";
+
+        await ffmpeg.load({
+            coreURL: await FFmpegUtil.toBlobURL(
+                `${baseURL}/ffmpeg-core.js`,
+                "text/javascript"
+            ),
+            wasmURL: await FFmpegUtil.toBlobURL(
+                `${baseURL}/ffmpeg-core.wasm`,
+                "application/wasm"
+            )
+        });
+
+        ffmpegLoaded = true;
+    }
+
+    async function runFFmpeg(argumentsArray) {
+        const exitCode = await ffmpeg.exec(argumentsArray);
+
+        if (exitCode !== 0) {
+            throw new Error(
+                "Video processing failed. " +
+                (lastFFmpegLog || "Unknown FFmpeg error.")
+            );
+        }
+    }
+
+    async function safeDelete(filename) {
+        try {
+            await ffmpeg.deleteFile(filename);
+        } catch (error) {
+            // File may not exist. Safe to ignore.
+        }
+    }
+
+    function fileExtension(filename, fallback) {
+        const parts = filename.split(".");
+        const extension =
+            parts.length > 1
+                ? parts.pop().toLowerCase()
+                : fallback;
+
+        return extension.replace(/[^a-z0-9]/g, "") || fallback;
+    }
+
+    function loadImage(url) {
+        return new Promise((resolve, reject) => {
+            const image = new Image();
+            image.onload = () => resolve(image);
+            image.onerror = reject;
+            image.src = url;
+        });
+    }
+
+    function wrapCanvasText(context, text, maxWidth) {
+        const paragraphs = text.split("\n");
+        const lines = [];
+
+        paragraphs.forEach((paragraph) => {
+            const words = paragraph.split(/\s+/);
+            let currentLine = "";
+
+            words.forEach((word) => {
+                const testLine =
+                    currentLine
+                        ? currentLine + " " + word
+                        : word;
+
+                if (
+                    context.measureText(testLine).width > maxWidth &&
+                    currentLine
+                ) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine = testLine;
+                }
+            });
+
+            if (currentLine) {
+                lines.push(currentLine);
+            }
+        });
+
+        return lines;
+    }
+
+    function roundedRectangle(context, x, y, width, height, radius) {
+        const r = Math.min(radius, width / 2, height / 2);
+
+        context.beginPath();
+        context.moveTo(x + r, y);
+        context.lineTo(x + width - r, y);
+        context.quadraticCurveTo(
+            x + width,
+            y,
+            x + width,
+            y + r
+        );
+        context.lineTo(x + width, y + height - r);
+        context.quadraticCurveTo(
+            x + width,
+            y + height,
+            x + width - r,
+            y + height
+        );
+        context.lineTo(x + r, y + height);
+        context.quadraticCurveTo(
+            x,
+            y + height,
+            x,
+            y + height - r
+        );
+        context.lineTo(x, y + r);
+        context.quadraticCurveTo(x, y, x + r, y);
+        context.closePath();
+    }
+
+    async function createOverlayImage(width, height) {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        const context = canvas.getContext("2d");
+        context.clearRect(0, 0, width, height);
+
+        const text = $("overlayText").value.trim();
+
+        if (text) {
+            const selectedFontSize =
+                Number($("fontSize").value);
+
+            const scale = width / 720;
+            const fontSize = selectedFontSize * scale;
+            const lineHeight = fontSize * 1.22;
+            const maxTextWidth = width * 0.82;
+
+            context.font =
+                `800 ${fontSize}px Arial, sans-serif`;
+            context.textAlign = "center";
+            context.textBaseline = "middle";
+
+            const lines = wrapCanvasText(
+                context,
+                text,
+                maxTextWidth
+            );
+
+            const widestLine = Math.max(
+                ...lines.map(
+                    (line) => context.measureText(line).width
+                ),
+                10
+            );
+
+            const paddingX = 28 * scale;
+            const paddingY = 20 * scale;
+
+            const boxWidth =
+                Math.min(width * 0.92, widestLine + paddingX * 2);
+
+            const boxHeight =
+                lines.length * lineHeight + paddingY * 2;
+
+            const position = $("textPosition").value;
+            let boxY;
+
+            if (position === "top") {
+                boxY = height * 0.08;
+            } else if (position === "bottom") {
+                boxY = height - boxHeight - height * 0.10;
+            } else {
+                boxY = (height - boxHeight) / 2;
+            }
+
+            const boxX = (width - boxWidth) / 2;
+            const opacity =
+                Number($("textOpacity").value) / 100;
+
+            if (opacity > 0) {
+                context.fillStyle =
+                    `rgba(0,0,0,${opacity})`;
+
+                roundedRectangle(
+                    context,
+                    boxX,
+                    boxY,
+                    boxWidth,
+                    boxHeight,
+                    18 * scale
+                );
+
+                context.fill();
+            }
+
+            context.fillStyle = $("textColor").value;
+            context.shadowColor = "rgba(0,0,0,0.65)";
+            context.shadowBlur = 7 * scale;
+            context.shadowOffsetY = 3 * scale;
+
+            lines.forEach((line, index) => {
+                const y =
+                    boxY +
+                    paddingY +
+                    lineHeight / 2 +
+                    index * lineHeight;
+
+                context.fillText(line, width / 2, y);
+            });
+
+            context.shadowColor = "transparent";
+        }
+
+        if (logo) {
+            const image = await loadImage(logo.url);
+            const percentage =
+                Number($("logoSize").value) / 100;
+
+            const maximumSize = width * percentage;
+            const ratio =
+                image.naturalWidth / image.naturalHeight;
+
+            let drawWidth;
+            let drawHeight;
+
+            if (ratio >= 1) {
+                drawWidth = maximumSize;
+                drawHeight = maximumSize / ratio;
+            } else {
+                drawHeight = maximumSize;
+                drawWidth = maximumSize * ratio;
+            }
+
+            const margin = width * 0.035;
+            const position = $("logoPosition").value;
+
+            const x = position.includes("left")
+                ? margin
+                : width - drawWidth - margin;
+
+            const y = position.includes("top")
+                ? margin
+                : height - drawHeight - margin;
+
+            context.drawImage(
+                image,
+                x,
+                y,
+                drawWidth,
+                drawHeight
+            );
+        }
+
+        return new Promise((resolve) => {
+            canvas.toBlob(resolve, "image/png");
+        });
+    }
+
+    async function renderProject() {
+        if (rendering) return;
+
+        if (!clips.length) {
+            alert("Upload video clips first.");
+            return;
+        }
+
+        const totalDuration = totalProjectDuration();
+
+        if (totalDuration <= 0) {
+            alert("Your project has no usable duration.");
+            return;
+        }
+
+        const confirmed = confirm(
+            "Start rendering?\n\n" +
+            "Keep this page open. Browser rendering can take several minutes."
+        );
+
+        if (!confirmed) return;
+
+        rendering = true;
+
+        $("renderButton").disabled = true;
+        $("downloadButton").disabled = true;
+        $("previewResultButton").disabled = true;
+
+        try {
+            await ensureFFmpeg();
+
+            const [width, height] =
+                $("resolution").value
+                    .split("x")
+                    .map(Number);
+
+            const crf = $("quality").value;
+            const fitMode = $("fitMode").value;
+            const useFade = $("fadeTransitions").checked;
+
+            const partNames = [];
+
+            for (let i = 0; i < clips.length; i++) {
+                const clip = clips[i];
+
+                progressBase = (i / clips.length) * 0.70;
+                progressSpan = 0.70 / clips.length;
+
+                setProgress(
+                    progressBase * 100,
+                    `Processing clip ${i + 1} of ${clips.length}`,
+                    clip.name
+                );
+
+                const extension =
+                    fileExtension(clip.file.name, "mp4");
+
+                const inputName =
+                    `input_${i}.${extension}`;
+
+                const partName =
+                    `part_${String(i).padStart(2, "0")}.mp4`;
+
+                const duration =
+                    Math.max(0.1, clip.end - clip.start);
+
+                await ffmpeg.writeFile(
+                    inputName,
+                    await FFmpegUtil.fetchFile(clip.file)
+                );
+
+                let videoFilter;
+
+                if (fitMode === "crop") {
+                    videoFilter =
+                        `scale=${width}:${height}:` +
+                        `force_original_aspect_ratio=increase,` +
+                        `crop=${width}:${height},` +
+                        `setsar=1,fps=30`;
+                } else {
+                    videoFilter =
+                        `scale=${width}:${height}:` +
+                        `force_original_aspect_ratio=decrease,` +
+                        `pad=${width}:${height}:` +
+                        `(ow-iw)/2:(oh-ih)/2:` +
+                        `color=0xF4EFE6,setsar=1,fps=30`;
+                }
+
+                if (useFade && duration > 0.35) {
+                    const fadeDuration =
+                        Math.min(0.25, duration / 3);
+
+                    const fadeOutStart =
+                        Math.max(
+                            fadeDuration,
+                            duration - fadeDuration
+                        );
+
+                    videoFilter +=
+                        `,fade=t=in:st=0:d=${fadeDuration}` +
+                        `,fade=t=out:st=${fadeOutStart}:d=${fadeDuration}`;
+                }
+
+                await runFFmpeg([
+                    "-y",
+                    "-ss", String(clip.start),
+                    "-i", inputName,
+                    "-t", String(duration),
+                    "-map", "0:v:0",
+                    "-vf", videoFilter,
+                    "-an",
+                    "-sn",
+                    "-c:v", "libx264",
+                    "-preset", "ultrafast",
+                    "-crf", crf,
+                    "-pix_fmt", "yuv420p",
+                    "-video_track_timescale", "90000",
+                    "-movflags", "+faststart",
+                    partName
+                ]);
+
+                partNames.push(partName);
+                await safeDelete(inputName);
+            }
+
+            progressBase = 0.70;
+            progressSpan = 0.10;
+
+            setProgress(
+                70,
+                "Combining all processed clips...",
+                "Creating one continuous video."
+            );
+
+            const listText = partNames
+                .map((name) => `file '${name}'`)
+                .join("\n");
+
+            await ffmpeg.writeFile(
+                "concat-list.txt",
+                new TextEncoder().encode(listText)
+            );
+
+            await runFFmpeg([
+                "-y",
+                "-f", "concat",
+                "-safe", "0",
+                "-i", "concat-list.txt",
+                "-c", "copy",
+                "combined.mp4"
+            ]);
+
+            for (const partName of partNames) {
+                await safeDelete(partName);
+            }
+
+            await safeDelete("concat-list.txt");
+
+            const hasText =
+                $("overlayText").value.trim().length > 0;
+
+            const hasOverlay = hasText || Boolean(logo);
+
+            let finalFilename = "combined.mp4";
+
+            if (hasOverlay || music) {
+                progressBase = 0.80;
+                progressSpan = 0.19;
+
+                setProgress(
+                    80,
+                    "Adding text, logo and music...",
+                    "Creating final MP4."
+                );
+
+                const argumentsArray = [
+                    "-y",
+                    "-i", "combined.mp4"
+                ];
+
+                let nextInputIndex = 1;
+                let overlayInputIndex = null;
+                let musicInputIndex = null;
+                let overlayBlob = null;
+                let musicFilename = null;
+
+                if (hasOverlay) {
+                    overlayBlob =
+                        await createOverlayImage(width, height);
+
+                    await ffmpeg.writeFile(
+                        "overlay.png",
+                        await FFmpegUtil.fetchFile(overlayBlob)
+                    );
+
+                    overlayInputIndex = nextInputIndex++;
+
+                    argumentsArray.push(
+                        "-loop", "1",
+                        "-framerate", "30",
+                        "-i", "overlay.png"
+                    );
+                }
+
+                if (music) {
+                    const extension =
+                        fileExtension(music.file.name, "mp3");
+
+                    musicFilename =
+                        `background_music.${extension}`;
+
+                    await ffmpeg.writeFile(
+                        musicFilename,
+                        await FFmpegUtil.fetchFile(music.file)
+                    );
+
+                    musicInputIndex = nextInputIndex++;
+
+                    argumentsArray.push(
+                        "-stream_loop", "-1",
+                        "-i", musicFilename
+                    );
+                }
+
+                const filters = [];
+
+                if (hasOverlay) {
+                    filters.push(
+                        `[0:v][${overlayInputIndex}:v]` +
+                        `overlay=0:0:shortest=1[v]`
+                    );
+                }
+
+                if (music) {
+                    const volume =
+                        Number($("musicVolume").value) / 100;
+
+                    filters.push(
+                        `[${musicInputIndex}:a]` +
+                        `volume=${volume.toFixed(2)}[a]`
+                    );
+                }
+
+                argumentsArray.push(
+                    "-filter_complex",
+                    filters.join(";")
+                );
+
+                argumentsArray.push(
+                    "-map",
+                    hasOverlay ? "[v]" : "0:v:0"
+                );
+
+                if (music) {
+                    argumentsArray.push("-map", "[a]");
+                }
+
+                if (hasOverlay) {
+                    argumentsArray.push(
+                        "-c:v", "libx264",
+                        "-preset", "ultrafast",
+                        "-crf", crf,
+                        "-pix_fmt", "yuv420p"
+                    );
+                } else {
+                    argumentsArray.push("-c:v", "copy");
+                }
+
+                if (music) {
+                    argumentsArray.push(
+                        "-c:a", "aac",
+                        "-b:a", "160k"
+                    );
+                } else {
+                    argumentsArray.push("-an");
+                }
+
+                argumentsArray.push(
+                    "-t", totalDuration.toFixed(3),
+                    "-movflags", "+faststart",
+                    "final.mp4"
+                );
+
+                await runFFmpeg(argumentsArray);
+
+                finalFilename = "final.mp4";
+
+                await safeDelete("combined.mp4");
+                await safeDelete("overlay.png");
+
+                if (musicFilename) {
+                    await safeDelete(musicFilename);
+                }
+            }
+
+            const outputData =
+                await ffmpeg.readFile(finalFilename);
+
+            renderedBlob = new Blob(
+                [outputData],
+                { type: "video/mp4" }
+            );
+
+            if (renderedURL) {
+                URL.revokeObjectURL(renderedURL);
+            }
+
+            renderedURL = URL.createObjectURL(renderedBlob);
+
+            await safeDelete(finalFilename);
+
+            renderedMode = true;
+            sequencePlaying = false;
+            pauseMusic();
+
+            previewVideo.pause();
+            previewVideo.src = renderedURL;
+            previewVideo.style.objectFit = "contain";
+
+            $("emptyState").style.display = "none";
+            $("textOverlay").style.display = "none";
+            $("logoOverlay").style.display = "none";
+
+            $("previewInfo").textContent =
+                "Rendered final video — ready to preview or download";
+
+            setProgress(
+                100,
+                "Rendering completed",
+                "Your combined MP4 is ready."
+            );
+
+            $("renderStatus").innerHTML =
+                '<span class="success">All clips were combined successfully.</span>';
+
+            $("resultInfo").innerHTML =
+                `<span class="success">Final video ready.</span><br>` +
+                `Duration: ${totalDuration.toFixed(1)} seconds<br>` +
+                `Size: ${(renderedBlob.size / 1024 / 1024).toFixed(1)} MB`;
+
+            $("downloadButton").disabled = false;
+            $("previewResultButton").disabled = false;
+
+        } catch (error) {
+            console.error(error);
+
+            $("renderStatus").innerHTML =
+                `<span class="error">${error.message}</span>`;
+
+            $("resultInfo").innerHTML =
+                '<span class="error">Rendering failed.</span><br>' +
+                'Try Chrome/Edge, 720p, shorter clips, or fewer clips.';
+        } finally {
+            rendering = false;
+            $("renderButton").disabled = false;
+        }
+    }
+
+    function previewRenderedVideo() {
+        if (!renderedURL) {
+            alert("Render the video first.");
+            return;
+        }
+
+        renderedMode = true;
+        sequencePlaying = false;
+        pauseMusic();
+
+        previewVideo.src = renderedURL;
+        previewVideo.style.objectFit = "contain";
+
+        $("textOverlay").style.display = "none";
+        $("logoOverlay").style.display = "none";
+        $("emptyState").style.display = "none";
+
+        previewVideo.play().catch(() => {});
+    }
+
+    function downloadResult() {
+        if (!renderedURL || !renderedBlob) {
+            alert("Render the complete video first.");
+            return;
+        }
+
+        const link = document.createElement("a");
+        link.href = renderedURL;
+        link.download =
+            `Azlan-YouTube-Short-${Date.now()}.mp4`;
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    }
+
+    updateOverlayPreview();
+</script>
+
+</body>
+</html>

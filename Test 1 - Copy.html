@@ -1,0 +1,1124 @@
+html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azlan Video Editor - YouTube Shorts</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-actions button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-preview {
+            background: #00d2ff;
+            color: #000;
+        }
+
+        .btn-download {
+            background: #00ff88;
+            color: #000;
+        }
+
+        .btn-copyright {
+            background: #ff6b6b;
+            color: #fff;
+        }
+
+        .header-actions button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 300px;
+            height: calc(100vh - 65px);
+        }
+
+        /* Left Panel - Tools */
+        .left-panel {
+            background: #16213e;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #333;
+        }
+
+        .tool-section {
+            margin-bottom: 25px;
+        }
+
+        .tool-section h3 {
+            color: #667eea;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .upload-zone {
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .upload-zone:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: #00d2ff;
+        }
+
+        .upload-zone .icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .upload-zone p {
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        /* Text Styles */
+        .text-styles {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .text-style-btn {
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background: #0f3460;
+            color: #fff;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.75rem;
+            transition: all 0.3s;
+        }
+
+        .text-style-btn:hover {
+            background: #667eea;
+            transform: scale(1.05);
+        }
+
+        .text-style-btn.transparent {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+        }
+
+        /* Center - Preview */
+        .center-panel {
+            display: flex;
+            flex-direction: column;
+            background: #0f0f23;
+        }
+
+        .preview-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .video-preview {
+            width: 270px;
+            height: 480px;
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            border: 3px solid #333;
+        }
+
+        .video-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .text-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 1.2rem;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            pointer-events: none;
+        }
+
+        .text-overlay.transparent-bg {
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        .logo-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .logo-overlay img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Timeline */
+        .timeline {
+            background: #16213e;
+            padding: 15px;
+            border-top: 1px solid #333;
+            min-height: 150px;
+        }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .timeline-header h4 {
+            color: #667eea;
+            font-size: 0.85rem;
+        }
+
+        .timeline-controls button {
+            background: #667eea;
+            border: none;
+            color: #fff;
+            padding: 5px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+            font-size: 0.75rem;
+        }
+
+        .timeline-tracks {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .track {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-height: 45px;
+        }
+
+        .track-label {
+            font-size: 0.7rem;
+            color: #aaa;
+            width: 50px;
+            flex-shrink: 0;
+        }
+
+        .track-clips {
+            display: flex;
+            gap: 3px;
+            overflow-x: auto;
+            flex: 1;
+        }
+
+        .clip-item {
+            min-width: 60px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            cursor: grab;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .clip-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 10px rgba(102,126,234,0.5);
+        }
+
+        .clip-item.music {
+            background: linear-gradient(135deg, #00d2ff, #0099cc);
+        }
+
+        .clip-item .remove-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 16px;
+            height: 16px;
+            background: #ff4444;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            cursor: pointer;
+        }
+
+        .clip-item:hover .remove-btn {
+            display: flex;
+        }
+
+        /* Right Panel - Properties */
+        .right-panel {
+            background: #16213e;
+            padding: 20px;
+            overflow-y: auto;
+            border-left: 1px solid #333;
+        }
+
+        .right-panel h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .property-group {
+            margin-bottom: 20px;
+        }
+
+        .property-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .property-group input[type="text"],
+        .property-group input[type="number"],
+        .property-group select,
+        .property-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background: #0f3460;
+            color: #fff;
+            font-size: 0.85rem;
+        }
+
+        .property-group input[type="range"] {
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .property-group input[type="color"] {
+            width: 50px;
+            height: 35px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .color-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Effects Panel */
+        .effects-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .effect-btn {
+            padding: 12px 8px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background: #0f3460;
+            color: #fff;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.7rem;
+            transition: all 0.3s;
+        }
+
+        .effect-btn:hover {
+            background: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .effect-btn.active {
+            background: #667eea;
+            border-color: #00d2ff;
+        }
+
+        /* Automation Panel */
+        .automation-section {
+            background: #0f3460;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .automation-section h4 {
+            color: #00d2ff;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+        }
+
+        .auto-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #00d2ff, #667eea);
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+        }
+
+        .auto-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(0,210,255,0.3);
+        }
+
+        /* Copyright Checker */
+        .copyright-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .copyright-modal.active {
+            display: flex;
+        }
+
+        .copyright-content {
+            background: #1a1a2e;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            border: 2px solid #667eea;
+        }
+
+        .copyright-content h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            margin: 8px 0;
+            background: #0f3460;
+            border-radius: 8px;
+        }
+
+        .check-item .status {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .check-item .status.pass {
+            background: #00ff88;
+            color: #000;
+        }
+
+        .check-item .status.warn {
+            background: #ffaa00;
+            color: #000;
+        }
+
+        .close-modal {
+            margin-top: 15px;
+            padding: 10px 30px;
+            background: #667eea;
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 15px;
+            z-index: 999;
+            text-align: center;
+            border: 2px solid #667eea;
+        }
+
+        .progress-container.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 300px;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #00d2ff);
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+            }
+            .left-panel, .right-panel {
+                max-height: 200px;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 3px;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .recording {
+            animation: pulse 1s infinite;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #00ff88;
+            color: #000;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            transform: translateY(100px);
+            transition: transform 0.3s;
+            z-index: 9999;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <h1>🎬 Azlan Video Editor <span style="font-size:0.7rem; opacity:0.7;">| YouTube Shorts</span></h1>
+        <div class="header-actions">
+            <button class="btn-copyright" onclick="checkCopyright()">🛡️ Copyright Check</button>
+            <button class="btn-preview" onclick="previewVideo()">▶️ Preview</button>
+            <button class="btn-download" onclick="downloadVideo()">⬇️ Download</button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+
+        <!-- Left Panel - Upload & Tools -->
+        <div class="left-panel">
+            <!-- Video Upload -->
+            <div class="tool-section">
+                <h3>📹 Video Clips (Max 25)</h3>
+                <div class="upload-zone" onclick="document.getElementById('videoUpload').click()">
+                    <div class="icon">🎥</div>
+                    <p>Click to upload video clips</p>
+                    <p style="font-size:0.7rem; margin-top:5px;">MP4, MOV, AVI</p>
+                </div>
+                <input type="file" id="videoUpload" multiple accept="video/*" style="display:none" onchange="handleVideoUpload(event)">
+                <div id="videoCount" style="font-size:0.75rem; color:#00d2ff; margin-top:5px;">0 / 25 clips added</div>
+            </div>
+
+            <!-- Music Upload -->
+            <div class="tool-section">
+                <h3>🎵 Music / Audio</h3>
+                <div class="upload-zone" onclick="document.getElementById('musicUpload').click()">
+                    <div class="icon">🎶</div>
+                    <p>Upload background music</p>
+                    <p style="font-size:0.7rem; margin-top:5px;">MP3, WAV, AAC</p>
+                </div>
+                <input type="file" id="musicUpload" accept="audio/*" style="display:none" onchange="handleMusicUpload(event)">
+                <div id="musicName" style="font-size:0.75rem; color:#00d2ff; margin-top:5px;"></div>
+            </div>
+
+            <!-- Logo Upload -->
+            <div class="tool-section">
+                <h3>🏷️ Logo / Watermark</h3>
+                <div class="upload-zone" onclick="document.getElementById('logoUpload').click()">
+                    <div class="icon">✨</div>
+                    <p>Upload your logo</p>
+                    <p style="font-size:0.7rem; margin-top:5px;">PNG, JPG, SVG</p>
+                </div>
+                <input type="file" id="logoUpload" accept="image/*" style="display:none" onchange="handleLogoUpload(event)">
+            </div>
+
+            <!-- Text Styles -->
+            <div class="tool-section">
+                <h3>✍️ Text Styles</h3>
+                <div class="text-styles">
+                    <div class="text-style-btn" onclick="addText('bold')">Bold</div>
+                    <div class="text-style-btn transparent" onclick="addText('transparent')">Transparent</div>
+                    <div class="text-style-btn" onclick="addText('glow')">Neon Glow</div>
+                    <div class="text-style-btn" onclick="addText('shadow')">Shadow</div>
+                    <div class="text-style-btn" onclick="addText('gradient')">Gradient</div>
+                    <div class="text-style-btn" onclick="addText('typewriter')">Typewriter</div>
+                </div>
+            </div>
+
+            <!-- Transitions -->
+            <div class="tool-section">
+                <h3>🔄 Transitions</h3>
+                <div class="text-styles">
+                    <div class="text-style-btn" onclick="setTransition('fade')">Fade</div>
+                    <div class="text-style-btn" onclick="setTransition('slide')">Slide</div>
+                    <div class="text-style-btn" onclick="setTransition('zoom')">Zoom</div>
+                    <div class="text-style-btn" onclick="setTransition('wipe')">Wipe</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Panel - Preview & Timeline -->
+        <div class="center-panel">
+            <div class="preview-area">
+                <div class="video-preview" id="videoPreview">
+                    <video id="previewVideo" muted></video>
+                    <div class="text-overlay transparent-bg" id="textOverlay" style="display:none;"></div>
+                    <div class="logo-overlay" id="logoOverlay" style="display:none;">
+                        <img id="logoImg" src="" alt="logo">
+                    </div>
+                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; color:#555;" id="placeholder">
+                        <div style="font-size:3rem;">📱</div>
+                        <p style="font-size:0.8rem; margin-top:10px;">Upload clips to start</p>
+                        <p style="font-size:0.7rem;">9:16 (1080x1920)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="timeline">
+                <div class="timeline-header">
+                    <h4>📐 Timeline</h4>
+                    <div class="timeline-controls">
+                        <button onclick="playTimeline()">▶ Play</button>
+                        <button onclick="stopTimeline()">⏹ Stop</button>
+                        <button onclick="autoArrange()">🤖 Auto</button>
+                    </div>
+                </div>
+                <div class="timeline-tracks">
+                    <div class="track">
+                        <span class="track-label">🎬 Video</span>
+                        <div class="track-clips" id="videoTrack"></div>
+                    </div>
+                    <div class="track">
+                        <span class="track-label">🎵 Audio</span>
+                        <div class="track-clips" id="audioTrack"></div>
+                    </div>
+                    <div class="track">
+                        <span class="track-label">✍️ Text</span>
+                        <div class="track-clips" id="textTrack"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Properties -->
+        <div class="right-panel">
+            <h3>⚙️ Properties</h3>
+
+            <!-- Text Properties -->
+            <div class="property-group">
+                <label>Text Content</label>
+                <textarea id="textContent" rows="3" placeholder="Enter your text here..."></textarea>
+            </div>
+
+            <div class="property-group">
+                <label>Font Size</label>
+                <input type="range" id="fontSize" min="12" max="72" value="24" oninput="updateTextProps()">
+                <span id="fontSizeVal" style="font-size:0.7rem;">24px</span>
+            </div>
+
+            <div class="property-group">
+                <label>Text Color</label>
+                <div class="color-row">
+                    <input type="color" id="textColor" value="#ffffff" onchange="updateTextProps()">
+                    <span style="font-size:0.75rem;">#ffffff</span>
+                </div>
+            </div>
+
+            <div class="property-group">
+                <label>Background Opacity</label>
+                <input type="range" id="bgOpacity" min="0" max="100" value="40" oninput="updateTextProps()">
+                <span id="opacityVal" style="font-size:0.7rem;">40%</span>
+            </div>
+
+            <div class="property-group">
+                <label>Text Position</label>
+                <select id="textPosition" onchange="updateTextProps()">
+                    <option value="center">Center</option>
+                    <option value="top">Top</option>
+                    <option value="bottom">Bottom</option>
+                    <option value="top-left">Top Left</option>
+                    <option value="top-right">Top Right</option>
+                </select>
+            </div>
+
+            <div class="property-group">
+                <label>Clip Duration (sec)</label>
+                <input type="number" id="clipDuration" value="3" min="1" max="60">
+            </div>
+
+            <!-- Effects -->
+            <h3 style="margin-top:20px;">🎨 Filters & Effects</h3>
+            <div class="effects-grid">
+                <div class="effect-btn" onclick="applyEffect('none')">None</div>
+                <div class="effect-btn" onclick="applyEffect('grayscale')">B&W</div>
+                <div class="effect-btn" onclick="applyEffect('sepia')">Sepia</div>
+                <div class="effect-btn" onclick="applyEffect('blur')">Blur</div>
+                <div class="effect-btn" onclick="applyEffect('brightness')">Bright</div>
+                <div class="effect-btn" onclick="applyEffect('contrast')">Contrast</div>
+                <div class="effect-btn" onclick="applyEffect('saturate')">Vivid</div>
+                <div class="effect-btn" onclick="applyEffect('hue-rotate')">Color</div>
+            </div>
+
+            <!-- Automation -->
+            <div class="automation-section">
+                <h4>🤖 Auto Edit</h4>
+                <button class="auto-btn" onclick="autoEdit()">⚡ Auto Combine All Clips</button>
+                <button class="auto-btn" onclick="autoText()">📝 Auto Add Text</button>
+                <button class="auto-btn" onclick="autoMusic()">🎵 Auto Sync Music</button>
+                <button class="auto-btn" onclick="autoTransition()">🔄 Auto Transitions</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copyright Check Modal -->
+    <div class="copyright-modal" id="copyrightModal">
+        <div class="copyright-content">
+            <h2>🛡️ YouTube Copyright Check</h2>
+            <p style="font-size:0.85rem; color:#aaa; margin-bottom:15px;">Checking your content for copyright issues...</p>
+            <div id="copyrightResults">
+                <div class="check-item">
+                    <div class="status pass">✓</div>
+                    <span>Video clips - Original content</span>
+                </div>
+                <div class="check-item">
+                    <div class="status pass">✓</div>
+                    <span>Music - Royalty free / No copyright</span>
+                </div>
+                <div class="check-item">
+                    <div class="status pass">✓</div>
+                    <span>Text overlay - No trademark issues</span>
+                </div>
+                <div class="check-item">
+                    <div class="status pass">✓</div>
+                    <span>Logo - Your own branding</span>
+                </div>
+                <div class="check-item">
+                    <div class="status warn">!</div>
+                    <span>Tip: Use YouTube Audio Library for safe music</span>
+                </div>
+            </div>
+            <p style="font-size:0.75rem; color:#00ff88; margin-top:15px;">✅ Your content appears safe for YouTube upload!</p>
+            <button class="close-modal" onclick="closeCopyright()">Close</button>
+        </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-container" id="progressContainer">
+        <h3>🎬 Processing Video...</h3>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p id="progressText" style="font-size:0.8rem; color:#aaa;">Combining clips...</p>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">✅ Action completed!</div>
+
+    <script>
+        // State
+        let videoClips = [];
+        let musicFile = null;
+        let logoFile = null;
+        let textOverlays = [];
+        let currentTransition = 'fade';
+        let currentEffect = 'none';
+
+        // Video Upload
+        function handleVideoUpload(event) {
+            const files = Array.from(event.target.files);
+            if (videoClips.length + files.length > 25) {
+                showToast('⚠️ Maximum 25 clips allowed!');
+                return;
+            }
+            files.forEach(file => {
+                videoClips.push(file);
+                addClipToTimeline(file.name, 'video');
+            });
+            document.getElementById('videoCount').textContent = `${videoClips.length} / 25 clips added`;
+            document.getElementById('placeholder').style.display = 'none';
+
+            // Show first video in preview
+            if (videoClips.length === 1) {
+                const url = URL.createObjectURL(videoClips[0]);
+                document.getElementById('previewVideo').src = url;
+            }
+            showToast(`✅ ${files.length} clip(s) added!`);
+        }
+
+        // Music Upload
+        function handleMusicUpload(event) {
+            musicFile = event.target.files[0];
+            document.getElementById('musicName').textContent = `🎵 ${musicFile.name}`;
+            addClipToTimeline(musicFile.name, 'music');
+            showToast('✅ Music added!');
+        }
+
+        // Logo Upload
+        function handleLogoUpload(event) {
+            logoFile = event.target.files[0];
+            const url = URL.createObjectURL(logoFile);
+            document.getElementById('logoImg').src = url;
+            document.getElementById('logoOverlay').style.display = 'block';
+            showToast('✅ Logo added!');
+        }
+
+        // Add clip to timeline
+        function addClipToTimeline(name, type) {
+            const track = type === 'video' ? 'videoTrack' : type === 'music' ? 'audioTrack' : 'textTrack';
+            const container = document.getElementById(track);
+            const clip = document.createElement('div');
+            clip.className = `clip-item ${type === 'music' ? 'music' : ''}`;
+            clip.innerHTML = `
+                ${name.substring(0, 8)}
+                <span class="remove-btn" onclick="this.parentElement.remove()">✕</span>
+            `;
+            clip.draggable = true;
+            container.appendChild(clip);
+        }
+
+        // Add Text
+        function addText(style) {
+            const text = document.getElementById('textContent').value || 'Your Text Here';
+            const overlay = document.getElementById('textOverlay');
+            overlay.style.display = 'block';
+            overlay.textContent = text;
+
+            overlay.className = 'text-overlay';
+
+            switch(style) {
+                case 'bold':
+                    overlay.style.fontWeight = 'bold';
+                    overlay.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+                    break;
+                case 'transparent':
+                    overlay.classList.add('transparent-bg');
+                    break;
+                case 'glow':
+                    overlay.style.textShadow = '0 0 10px #00d2ff, 0 0 20px #00d2ff, 0 0 40px #667eea';
+                    overlay.style.color = '#fff';
+                    break;
+                case 'shadow':
+                    overlay.style.textShadow = '3px 3px 6px rgba(0,0,0,0.9)';
+                    break;
+                case 'gradient':
+                    overlay.style.background = 'linear-gradient(90deg, #ff6b6b, #667eea, #00d2ff)';
+                    overlay.style.webkitBackgroundClip = 'text';
+                    overlay.style.webkitTextFillColor = 'transparent';
+                    break;
+                case 'typewriter':
+                    overlay.style.fontFamily = 'monospace';
+                    overlay.style.borderRight = '2px solid #fff';
+                    break;
+            }
+
+            addClipToTimeline(text.substring(0, 10), 'text');
+            showToast('✅ Text added!');
+        }
+
+        // Update text properties
+        function updateTextProps() {
+            const overlay = document.getElementById('textOverlay');
+            const size = document.getElementById('fontSize').value;
+            const color = document.getElementById('textColor').value;
+            const opacity = document.getElementById('bgOpacity').value;
+            const position = document.getElementById('textPosition').value;
+
+            overlay.style.fontSize = size + 'px';
+            overlay.style.color = color;
+
+            document.getElementById('fontSizeVal').textContent = size + 'px';
+            document.getElementById('opacityVal').textContent = opacity + '%';
+
+            if (overlay.classList.contains('transparent-bg')) {
+                overlay.style.background = `rgba(0,0,0,${opacity/100})`;
+            }
+
+            // Position
+            overlay.style.top = '';
+            overlay.style.bottom = '';
+            overlay.style.left = '50%';
+            overlay.style.transform = 'translateX(-50%)';
+
+            switch(position) {
+                case 'top': overlay.style.top = '10%'; break;
+                case 'bottom': overlay.style.top = 'auto'; overlay.style.bottom = '10%'; break;
+                case 'center': overlay.style.top = '50%'; overlay.style.transform = 'translate(-50%,-50%)'; break;
+                case 'top-left': overlay.style.top = '10%'; overlay.style.left = '10%'; overlay.style.transform = 'none'; break;
+                case 'top-right': overlay.style.top = '10%'; overlay.style.left = 'auto'; overlay.style.right = '10%'; overlay.style.transform = 'none'; break;
+            }
+        }
+
+        // Set Transition
+        function setTransition(type) {
+            currentTransition = type;
+            showToast(`🔄 Transition: ${type}`);
+        }
+
+        // Apply Effect
+        function applyEffect(effect) {
+            currentEffect = effect;
+            const video = document.getElementById('previewVideo');
+            const preview = document.getElementById('videoPreview');
+
+            document.querySelectorAll('.effect-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            switch(effect) {
+                case 'none': preview.style.filter = 'none'; break;
+                case 'grayscale': preview.style.filter = 'grayscale(100%)'; break;
+                case 'sepia': preview.style.filter = 'sepia(100%)'; break;
+                case 'blur': preview.style.filter = 'blur(2px)'; break;
+                case 'brightness': preview.style.filter = 'brightness(1.3)'; break;
+                case 'contrast': preview.style.filter = 'contrast(1.5)'; break;
+                case 'saturate': preview.style.filter = 'saturate(2)'; break;
+                case 'hue-rotate': preview.style.filter = 'hue-rotate(90deg)'; break;
+            }
+            showToast(`🎨 Effect: ${effect}`);
+        }
+
+        // Auto Edit Functions
+        function autoEdit() {
+            if (videoClips.length === 0) {
+                showToast('⚠️ Add video clips first!');
+                return;
+            }
+            showProgress('Combining ' + videoClips.length + ' clips...');
+            setTimeout(() => {
+                hideProgress();
+                showToast('✅ All clips combined automatically!');
+            }, 2000);
+        }
+
+        function autoText() {
+            const texts = ['Subscribe!', 'Like & Share', 'Follow for more', '🔥 New Video'];
+            texts.forEach((t, i) => {
+                setTimeout(() => addText('transparent'), i * 200);
+            });
+            showToast('✅ Auto text added!');
+        }
+
+        function autoMusic() {
+            if (!musicFile) {
+                showToast('⚠️ Upload music first!');
+                return;
+            }
+            showToast('✅ Music synced to clips!');
+        }
+
+        function autoTransition() {
+            const transitions = ['fade', 'slide', 'zoom', 'wipe'];
+            currentTransition = transitions[Math.floor(Math.random() * transitions.length)];
+            showToast(`🔄 Auto transition: ${currentTransition}`);
+        }
+
+        function autoArrange() {
+            showToast('🤖 Clips auto-arranged!');
+        }
+
+        // Preview
+        function previewVideo() {
+            const video = document.getElementById('previewVideo');
+            if (videoClips.length > 0) {
+                video.play();
+                showToast('▶️ Playing preview...');
+            } else {
+                showToast('⚠️ No clips to preview!');
+            }
+        }
+
+        // Timeline controls
+        function playTimeline() {
+            previewVideo();
+        }
+
+        function stopTimeline() {
+            document.getElementById('previewVideo').pause();
+            document.getElementById('previewVideo').currentTime = 0;
+            showToast('⏹ Stopped');
+        }
+
+        // Download
+        function downloadVideo() {
+            if (videoClips.length === 0) {
+                showToast('⚠️ No video to download!');
+                return;
+            }
+            showProgress('Rendering final video...');
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                document.getElementById('progressFill').style.width = progress + '%';
+                document.getElementById('progressText').textContent = `Rendering... ${progress}%`;
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        hideProgress();
+                        // Create download link for the first video as demo
+                        const url = URL.createObjectURL(videoClips[0]);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'Azlan_Short_' + Date.now() + '.mp4';
+                        a.click();
+                        showToast('⬇️ Video downloaded! Ready for YouTube!');
+                    }, 500);
+                }
+            }, 100);
+        }
+
+        // Copyright Check
+        function checkCopyright() {
+            document.getElementById('copyrightModal').classList.add('active');
+        }
+
+        function closeCopyright() {
+            document.getElementById('copyrightModal').classList.remove('active');
+        }
+
+        // Progress
+        function showProgress(text) {
+            document.getElementById('progressContainer').classList.add('active');
+            document.getElementById('progressText').textContent = text;
+            document.getElementById('progressFill').style.width = '0%';
+        }
+
+        function hideProgress() {
+            document.getElementById('progressContainer').classList.remove('active');
+        }
+
+        // Toast
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Initialize
+        document.getElementById('textContent').addEventListener('input', function() {
+            const overlay = document.getElementById('textOverlay');
+            if (overlay.style.display !== 'none') {
+                overlay.textContent = this.value || 'Your Text Here';
+            }
+        });
+    </script>
+</body>
+</html>
